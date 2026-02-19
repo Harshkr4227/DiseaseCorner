@@ -2,9 +2,11 @@ import { getEntityDetails } from "@/lib/icd-api"
 import { notFound } from "next/navigation"
 import { Metadata } from "next"
 import Link from "next/link"
-import { ArrowLeft, Share2, Bookmark, FileText, Info, AlertTriangle } from "lucide-react"
-import { Button } from "@/components/ui/Button"
+import { ArrowLeft, FileText, Info, AlertTriangle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
+import { DiseaseActions } from "@/components/disease/DiseaseActions"
+
+
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = (await params)
@@ -74,14 +76,7 @@ export default async function DiseasePage({ params }: { params: Promise<{ slug: 
               <div className="text-lg md:text-xl text-[#333333] max-w-3xl leading-relaxed font-serif" dangerouslySetInnerHTML={{ __html: definition }}>
               </div>
             </div>
-            <div className="flex space-x-3 mt-4 md:mt-0">
-              <Button variant="secondary" size="sm" className="gap-2 border-2 border-[#111111] hover:bg-[#111111] hover:text-white transition-all rounded-sm shadow-none">
-                <Bookmark className="h-4 w-4" /> Save
-              </Button>
-              <Button variant="secondary" size="sm" className="gap-2 border-2 border-[#111111] hover:bg-[#111111] hover:text-white transition-all rounded-sm shadow-none">
-                <Share2 className="h-4 w-4" /> Share
-              </Button>
-            </div>
+            <DiseaseActions diseaseTitle={titleSlug} />
           </div>
         </div>
       </div>
