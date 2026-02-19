@@ -1,0 +1,21 @@
+{
+  "name": "Disease Corner",
+  "short_name": "Disease Corner",
+  "description": "Instant disease information including definition, symptoms, causes, treatments, and prevention.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#EAF4FF",
+  "theme_color": "#2F80ED",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
