@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server';
 const CLIENT_ID = process.env.WHO_ICD_CLIENT_ID;
 const CLIENT_SECRET = process.env.WHO_ICD_CLIENT_SECRET;
 const TOKEN_ENDPOINT = 'https://icdaccessmanagement.who.int/connect/token';
-const API_BASE_URL = 'https://id.who.int/icd/entity';
-const SEARCH_ENDPOINT = 'https://id.who.int/icd/entity/search';
+const API_BASE_URL = 'https://id.who.int/icd/release/11/2024-01/mms';
+const SEARCH_ENDPOINT = 'https://id.who.int/icd/release/11/2024-01/mms/search';
 
 let accessToken: string | null = null;
 let tokenExpiry: number | null = null;
@@ -90,10 +90,20 @@ export async function searchICD(query: string): Promise<ICDSearchResult[]> {
     if (data.destinationEntities) {
         return data.destinationEntities.map((entity: any) => {
             const fullUri = entity.uri || entity.id;
-            const entityId = fullUri ? String(fullUri).replace(/\/$/, '').split('/').pop() : entity.id;
+            // Extract the ID part after the version/linearization (e.g., everything after /mms/)
+            let entityId = entity.theCode;
+            if (!entityId && fullUri) {
+                const mmsKey = '/mms/';
+                const mmsIndex = fullUri.indexOf(mmsKey);
+                if (mmsIndex !== -1) {
+                    entityId = fullUri.substring(mmsIndex + mmsKey.length);
+                } else {
+                    entityId = fullUri.replace(/\/$/, '').split('/').pop();
+                }
+            }
             
             return {
-                id: entity.theCode || entityId, 
+                id: entityId || "unknown", 
                 title: entity.title,
                 definition: entity.title, 
                 uri: fullUri, 
@@ -112,16 +122,15 @@ export async function searchICD(query: string): Promise<ICDSearchResult[]> {
 
 export async function getEntityDetails(idOrUri: string) {
     const token = await getAccessToken();
-    // If it's a full URI, use it. If it's just a code/id, construct URL.
-    // For simplicity, let's assume we pass the full URI or we might need to look it up.
-    // However, the search result returns the URI.
     
     let url = idOrUri;
     if (!url.startsWith('http')) {
-        // It's likely a code or id, but the API endpoint structure is complex. 
-        // Best to use the URI returned from search.
-        // Fallback or specific logic might be needed if we only have a code.
         url = `${API_BASE_URL}/${idOrUri}`; 
+    }
+
+    // Force HTTPS for WHO ICD endpoints to avoid mixed content or redirect issues
+    if (url.includes('id.who.int')) {
+        url = url.replace('http://', 'https://');
     }
 
     try {
